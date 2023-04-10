@@ -1,0 +1,58 @@
+def add_time(start, duration, day=None):
+    # Validate start time input
+    if not re.match(r'^\d{1,2}:\d{2} (AM|PM)$', start):
+        return "Invalid start time format. Expected format: 'HH:MM AM/PM'"
+    
+    # Validate duration input
+    if not re.match(r'^\d{1,4}:\d{2}$', duration):
+        return "Invalid duration format. Expected format: 'HH:MM'"
+    
+    start_hour, start_min, start_period = start.split()[0].split(":")
+    start_hour = int(start_hour)
+    start_min = int(start_min)
+    if start_period == "PM":
+        start_hour += 12
+
+    duration_hour, duration_min = map(int, duration.split(":"))
+
+    end_min = (start_min + duration_min) % 60
+    end_hour = start_hour + (start_min + duration_min) // 60
+    end_period = start_period
+
+    if end_hour >= 24:
+        days_passed = end_hour // 24
+        end_hour = end_hour % 24
+    else:
+        days_passed = 0
+
+    if end_hour >= 12:
+        end_period = "PM"
+        if end_hour > 12:
+            end_hour -= 12
+    else:
+        end_period = "AM"
+        if end_hour == 0:
+            end_hour = 12
+
+    # Determine the number of days later
+    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    if day:
+        day_index = days_of_week.index(day.title())
+        new_day_index = (day_index + days_passed) % 7
+        new_day = days_of_week[new_day_index]
+        if days_passed == 1:
+            new_day += " (next day)"
+        elif days_passed > 1:
+            new_day += f" ({days_passed} days later)"
+    else:
+        new_day = None
+        if days_passed == 1:
+            new_day = " (next day)"
+        elif days_passed > 1:
+            new_day = f" ({days_passed} days later)"
+
+    # Format the output string
+    if new_day:
+        return f"{end_hour:02d}:{end_min:02d} {end_period}, {new_day}"
+    else:
+        return f"{end_hour:02d}:{end_min:02d} {end_period}"
